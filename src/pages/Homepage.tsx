@@ -3,11 +3,13 @@ import {
   useState,
 } from 'react';
 
+import Personalization from '@contentstack/personalization-sdk-js';
+
 import Banner from '../components/Banner/Banner';
 import Header, { NavLink } from '../components/Header/Header';
 import {
-  getEntry,
   getHeaderEntry,
+  getVariantEntry,
 } from '../helpers';
 
 interface BannerEntry {
@@ -26,8 +28,8 @@ interface HeaderEntry {
   title: string;
   section: {
     menu: {
-        link: NavLink[];
-    }
+      link: NavLink[];
+    };
   };
 }
 
@@ -40,10 +42,25 @@ export default function Homepage() {
   }, []);
 
   async function fetchData() {
-    const bannerData = await getEntry();
+    if (process.env.REACT_APP_PERSONALIZATION_DELIVERY_URL) {
+      Personalization.setApiUrl(process.env.REACT_APP_PERSONALIZATION_DELIVERY_URL);
+    }
+    if (process.env.REACT_APP_PERSONALIZATION_EDGE_URL) {
+      Personalization.setEdgeApiUrl(process.env.REACT_APP_PERSONALIZATION_EDGE_URL);
+    }
+
+    await Personalization.init(process.env.REACT_APP_PERSONALIZATION_PROJECT_ID as string, { edgeMode: true });
+
+    const cmsVariants = Personalization.getVariants();
+
+    const params = Object.entries(cmsVariants)
+      .map(([key, value]) => `${key}=${value}`)
+      .join(',');
+
+    const variantData = await getVariantEntry(params);
     const headerData = await getHeaderEntry();
 
-    setBannerEntry(bannerData);
+    setBannerEntry(variantData);
     setHeaderEntry(headerData);
   }
 

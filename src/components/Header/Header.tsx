@@ -1,6 +1,6 @@
 import './Header.css';
 
-import { Link } from 'react-router-dom';
+import Personalization from '@contentstack/personalization-sdk-js';
 
 export type NavLink = {
   text: string;
@@ -29,7 +29,11 @@ const Header = ({ menu }: HeaderProps) => {
           <ul>
             {menu.link.map((item) => (
               <li key={item.text}>
-                <Link to={item.link.href}> {item.text} </Link>
+                <a href={item.link.href} onClick={async () => {
+                   await Personalization.set({
+                    travel_destination: 'NA',
+                  });
+                }}> {item.text} </a>
               </li>
             ))}
           </ul>
