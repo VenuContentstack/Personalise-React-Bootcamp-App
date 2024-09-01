@@ -15,7 +15,33 @@ interface HeaderProps {
   };
 }
 
+
 const Header = ({ menu }: HeaderProps) => {
+
+  // const setAttribute = async (region: string) => {
+  //   console.log(region)
+  
+  //   switch(region.toLowerCase()) {
+  //   case 'europe':
+  //       await personalizationSDK.set({travel_destination: 'EU'});
+  //       break
+    
+  //   case 'asia':
+  //       await personalizationSDK.set({travel_destination: 'APAC'})
+  //       break
+    
+  //   case 'north america':
+  //       await personalizationSDK.set({travel_destination: 'NA',})
+  //       break
+    
+  //   case 'south america':
+  //       await personalizationSDK.set({travel_destination: 'SA',})
+  //       break    
+  //   }
+  
+  
+  
+  // } 
   return (
     <header className='header'>
       <div className='container'>
@@ -30,11 +56,14 @@ const Header = ({ menu }: HeaderProps) => {
             {menu.link.map((item) => (
               
               <li key={item.text}>
-                <a href={item.link.href} onClick={async () => {
+                <a href={item.link.href} 
+                onClick={async () => {
                    await Personalization.set({
-                    travel_destination: 'NA',
+                    travel_destination: item.text,
                   });
-                }}> {item.text} </a>
+              }}
+                  // onClick={() => setAttribute(String(item.text))}
+                > {item.text} </a>
               </li>
             ))}
           </ul>
