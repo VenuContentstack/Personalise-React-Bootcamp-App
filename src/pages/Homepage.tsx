@@ -32,25 +32,34 @@ interface HeaderEntry {
   section: {
     menu: {
       link: NavLink[];
+      cta:{
+        'title':'',
+        'href':''
+      };
     };
   };
+  
 }
+
+interface cmsVarient {
+  0: string;
+  1: string;
+  };
+
 
 
 export default function Homepage() {
   const [bannerEntry, setBannerEntry] = useState<BannerEntry | undefined>();
   const [headerEntry, setHeaderEntry] = useState<HeaderEntry | undefined>();
+  const [abCmsVariant, setABCmsVariant] = useState(String);
   const isFirstRun = useRef(true);
   useEffect(() => {
-    if (isFirstRun.current) {
-      console.log("first Render");
-      isFirstRun.current = false;
-      return;
-    }
     fetchData();
   }, []);
 
   async function fetchData() {
+    const headerData = await getHeaderEntry();
+    
     if (process.env.REACT_APP_PERSONALIZATION_DELIVERY_URL) {
       Personalization.setApiUrl(process.env.REACT_APP_PERSONALIZATION_DELIVERY_URL);
     }
@@ -59,41 +68,31 @@ export default function Homepage() {
     }
 
     await Personalization.init(process.env.REACT_APP_PERSONALIZATION_PROJECT_ID as string, { edgeMode: true });
-  //   if(!isFirstRun) {
-  //     console.log("second Render");
-  //     const cmsVariants = Personalization.getVariants();
-
-  //   const params = Object.entries(cmsVariants)
-  //     .map(([key, value]) => `${key}=${value}`)
-  //     .join(',');
-
-  //   const variantData = await getVariantEntry(params);
-  //   setBannerEntry(variantData);
+  
+    const cmsVariants = Personalization.getVariants();
+    setABCmsVariant(cmsVariants[1])
+   
+    headerData['section']['menu']['ab']=cmsVariants[1]
+    console.log(headerData)
+    setHeaderEntry(headerData);
+    const params = Object.entries(cmsVariants)
+      .map(([key, value]) => `${key}=${value}`)
+      .join(',');
+      console.log('in FetchData Method',headerData['section']['menu']['ab'],cmsVariants[1])
+    const variantData = await getVariantEntry(params);
+   
+    setBannerEntry(variantData);
+    
   //  }else{
   //   const bannerData = await getBannerEntry();
   //   setBannerEntry(bannerData);
   //  }
     
-   if(Personalization.getVariants()) {
-    const cmsVariants = Personalization.getVariants();
-
-    const params = Object.entries(cmsVariants)
-      .map(([key, value]) => `${key}=${value}`)
-      .join(',');
-
-    const variantData = await getVariantEntry(params);
-    setBannerEntry(variantData);
-   }else{
-    const bannerData = await getBannerEntry();
-    setBannerEntry(bannerData);
-   }
-    const headerData = await getHeaderEntry();
-    setHeaderEntry(headerData);
   }
 
   return (
     <div>
-      {headerEntry && <Header menu={headerEntry.section.menu} />}
+      {headerEntry && <Header menu={headerEntry.section.menu} ab= {abCmsVariant} />}
       {bannerEntry && (
         <Banner
           title={bannerEntry.title}
@@ -101,6 +100,7 @@ export default function Homepage() {
           buttonText={bannerEntry.call_to_action.title}
           buttonLink={bannerEntry.call_to_action.href}
           image={bannerEntry.banner_image.url}
+          ab= {abCmsVariant}
         />
       )}
     </div>

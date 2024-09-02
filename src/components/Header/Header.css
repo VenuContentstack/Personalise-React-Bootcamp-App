@@ -7,10 +7,11 @@
   }
   
   .container {
-    max-width: 1200px;
+    min-width: 100%;
     margin: 0 auto;
     display: flex;
     align-items: center;
+    justify-content: space-around;
   }
   
   .logo {
@@ -36,6 +37,20 @@
     text-decoration: none;
     color: #333;
     font-weight: bold;
+  }
+
+  .banner-button {
+    background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent button */
+    color: white !important;
+    padding: 10px 20px;
+    border: none;
+    border-radius: 5px;
+    text-decoration: none;
+    transition: background-color 0.3s;
+  }
+  
+  .banner-button:hover {
+    background-color: rgba(0, 0, 0, 0.7); /* Darker on hover */
   }
   
   .nav a:hover {

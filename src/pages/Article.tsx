@@ -2,7 +2,7 @@ import {
   useEffect,
   useState,
 } from 'react';
-
+import Personalization from '@contentstack/personalization-sdk-js';
 import { useNavigate, useParams } from "react-router-dom";
 import Header, { NavLink } from '../components/Header/Header';
 import {
@@ -18,7 +18,11 @@ interface HeaderEntry {
   section: {
     menu: {
       link: NavLink[];
-    }
+      cta:{
+        'title':'',
+        'href':''
+      };
+    };
   };
 }
 
@@ -33,6 +37,7 @@ interface ArticleEntry {
 export default function Article() {
   const [headerEntry, setHeaderEntry] = useState<HeaderEntry | undefined>();
   const [articleEntry, setArticleEntry] = useState<ArticleEntry | undefined>();
+  const [abCmsVariant, setABCmsVariant] = useState(String);
   useEffect(() => {
     fetchData();
   }, []);
@@ -40,19 +45,36 @@ export default function Article() {
 
   // Fetch slug from route parameters
   const { slug } = useParams();
-  console.log(slug)
+ 
 
   async function fetchData() {
+
+    if(Personalization.getInitializationStatus()!='success'){
+      if (process.env.REACT_APP_PERSONALIZATION_DELIVERY_URL) {
+        Personalization.setApiUrl(process.env.REACT_APP_PERSONALIZATION_DELIVERY_URL);
+      }
+      if (process.env.REACT_APP_PERSONALIZATION_EDGE_URL) {
+        Personalization.setEdgeApiUrl(process.env.REACT_APP_PERSONALIZATION_EDGE_URL);
+      }
+  
+      await Personalization.init(process.env.REACT_APP_PERSONALIZATION_PROJECT_ID as string, { edgeMode: true });
+    
+    }
+    await Personalization.set({
+      travel_destination: slug,
+    })
+    const cmsVariants = Personalization.getVariants();
     const headerData = await getHeaderEntry();
     const articleData = await getArticle(slug);
     console.log(articleData)
+    setABCmsVariant(cmsVariants[1])
     setHeaderEntry(headerData);
     setArticleEntry(articleData);
   }
 
   return (
     <div>
-      {headerEntry && <Header menu={headerEntry.section.menu} />}
+      {headerEntry && <Header menu={headerEntry.section.menu} ab= {abCmsVariant}  />}
       <div >
       <div className='container mx-auto' id='article-cover'>
           {articleEntry && <h1 data-id='h1-text' >{articleEntry.title}</h1>}
