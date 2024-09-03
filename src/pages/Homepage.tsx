@@ -68,10 +68,11 @@ export default function Homepage() {
     }
 
     await Personalization.init(process.env.REACT_APP_PERSONALIZATION_PROJECT_ID as string, { edgeMode: true });
-  
+    
     const cmsVariants = Personalization.getVariants();
     setABCmsVariant(cmsVariants[1])
-   
+    console.log(cmsVariants)
+    Personalization.triggerImpression('1')
     headerData['section']['menu']['ab']=cmsVariants[1]
     console.log(headerData)
     setHeaderEntry(headerData);

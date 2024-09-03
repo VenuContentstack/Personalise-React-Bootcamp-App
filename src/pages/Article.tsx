@@ -64,6 +64,8 @@ export default function Article() {
       travel_destination: slug,
     })
     const cmsVariants = Personalization.getVariants();
+   
+    Personalization.triggerImpression('1')
     const headerData = await getHeaderEntry();
     const articleData = await getArticle(slug);
     console.log(articleData)
