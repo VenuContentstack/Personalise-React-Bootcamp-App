@@ -3,7 +3,7 @@ import {
   useState,
 } from 'react';
 import Personalization from '@contentstack/personalization-sdk-js';
-import { useNavigate, useParams } from "react-router-dom";
+import {  useParams } from "react-router-dom";
 import Header, { NavLink } from '../components/Header/Header';
 import {
   getArticle,
@@ -41,7 +41,7 @@ export default function Article() {
   useEffect(() => {
     fetchData();
   }, []);
-  const navigate = useNavigate();
+  
 
   // Fetch slug from route parameters
   const { slug } = useParams();
@@ -49,7 +49,7 @@ export default function Article() {
 
   async function fetchData() {
 
-    if(Personalization.getInitializationStatus()!='success'){
+    if(Personalization.getInitializationStatus()!=='success'){
       if (process.env.REACT_APP_PERSONALIZATION_DELIVERY_URL) {
         Personalization.setApiUrl(process.env.REACT_APP_PERSONALIZATION_DELIVERY_URL);
       }
