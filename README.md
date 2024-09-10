@@ -1,46 +1,230 @@
-# Getting Started with Create React App
 
-This project was bootstrapped with [Create React App](https://github.com/facebook/create-react-app).
+# Contentstack Personalization JavaScript SDK
 
-## Available Scripts
+The JavaScript SDK allows you to personalize content of your Contentstack-powered websites, mobile apps by using React Native, and Node.js at the backend.
 
-In the project directory, you can run:
+Personalization in Contentstack is a 5-step process as described below:
 
-### `npm start`
+In the Personalization Management Console:
 
-Runs the app in the development mode.\
-Open [http://localhost:3000](http://localhost:3000) to view it in the browser.
+1. Create audiences using custom or preset attributes.
+2. Create a new Experience by building variations for your audiences.
 
-The page will reload if you make edits.\
-You will also see any lint errors in the console.
+Use the Personalization SDK:
 
-### `npm test`
+3. Get active variant short uids for a given project.
+4. Use the Personzalization SDK to capture custom user attributes.
+5. Trigger Impressions and Events using simple SDK methods.
 
-Launches the test runner in the interactive watch mode.\
-See the section about [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more information.
+## Getting Started
 
-### `npm run build`
+Let's now get started with setting up our essentials.
 
-Builds the app for production to the `build` folder.\
-It correctly bundles React in production mode and optimizes the build for the best performance.
+### Node.js
 
-The build is minified and the filenames include the hashes.\
-Your app is ready to be deployed!
+If you have selected Node.js for your project, then use the following command to install Contentstack Personalization.
 
-See the section about [deployment](https://facebook.github.io/create-react-app/docs/deployment) for more information.
+```
+$ npm i @contentstack/personalization-sdk-js
+```
 
-### `npm run eject`
+### Browser
 
-**Note: this is a one-way operation. Once you `eject`, you can’t go back!**
+You can use `npm i` as shown above, if you're using the NPM project setup.
 
-If you aren’t satisfied with the build tool and configuration choices, you can `eject` at any time. This command will remove the single build dependency from your project.
+## Initializing the SDK
 
-Instead, it will copy all the configuration files and the transitive dependencies (webpack, Babel, ESLint, etc) right into your project so you have full control over them. All of the commands except `eject` will still work, but they will point to the copied scripts so you can tweak them. At this point you’re on your own.
+Now that we have setup the essentials, let's initialize the JavaScript SDK.
 
-You don’t have to ever use `eject`. The curated feature set is suitable for small and middle deployments, and you shouldn’t feel obligated to use this feature. However we understand that this tool wouldn’t be useful if you couldn’t customize it when you are ready for it.
+Initializing the SDK is an asynchronous task as it involves populating active variants. Ideally, this should be done as early as possible in your application's lifecycle.
 
-## Learn More
+The `init` method is designed to initialize your personalization project in your application based on project id and other information such as edgeMode, request and userId.
 
-You can learn more in the [Create React App documentation](https://facebook.github.io/create-react-app/docs/getting-started).
+### Parameters
 
-To learn React, check out the [React documentation](https://reactjs.org/).
+1. `projectUid`: (Type: `string`) - The UID of your project.
+2. `options`: (Type: `Object`, optional)
+   1. `edgeMode`: (Type: `boolean`, optional) - We recommend to set edgeMode to true as the legacy mode is deprecated.
+   2. `request`: (Type: `Request`, optional) - It is required to pass in http request object when initializing the SDK in the backend.
+      This populates contextual attributes which helps in determining the active variants.
+   3. `userId`: (Type: `string`, optional) - Use this to identify your visitor with a custom User ID.
+
+### Usage
+
+```javascript
+import Personalization from '@contentstack/personalization-sdk-js';
+
+let projectUid = 'your-project-uid';
+
+// Using async-await:
+await Personalization.init(projectUid, {
+  edgeMode: true,
+});
+
+// Using promises
+Personalization.init(projectUid, {
+  edgeMode: true,
+}).then(() => {
+  // rest of your code
+});
+```
+
+### **Verifying the status of SDK initialization**
+
+As said above, the SDK initialization is a asynchronous process, you can get the status of initialization at any time using `getInitializationStatus` method.
+
+### Return value
+
+The method returns one of the following values:
+
+1. `initializing` - Indicates that SDK is initializing.
+2. `success` - Indicates that the SDK is initialized.
+3. `error` - Indicates that something went wrong while initializing the SDK.
+
+### Usage
+
+```javascript
+const status = Personalization.getInitializationStatus();
+```
+
+## Identifying Visitors
+
+### **Getting User ID**
+
+You can get the current visitor's User ID using `getUserId` method.
+
+### Usage
+
+```javascript
+const userId = Personalization.getUserId();
+```
+
+The method returns userId as string. This value is automatically generated by personalization, unless set explicitly.
+
+### **Setting custom User ID**
+
+You can always set your custom user id for the visitor using `setUserId` method.
+
+### Parameters
+
+1. `userId`: (Type: `string`) - User ID that you want to set.
+2. `options`: (Type: `Object`, optional)
+   1. `preserveUserAttributes`: (Type: boolean, optional) - Set the value to `true` if you want to preserve/merge the user attributes with the new User ID.
+
+### Usage
+
+```javascript
+const newUserId = 'new-user-id';
+
+Personalization.setUserId(newUserId);
+```
+
+### **Preserving User Attributes**
+
+Suppose you set some attributes like `age` for an anonymous user and you want these attributes to be preserved/merged when the user logs in, you can use `setUserId` with `preserveAttributes`
+
+### Usage
+
+```javascript
+const newUserId = 'new-user-id';
+
+Personalization.setUserId(newUserId, { preserveUserAttributes: true });
+```
+
+## Getting Active Variant Short UIDs
+
+Given that you are using the SDK in the edge mode, you can get active variants for experiences in the project using `getVariants`.
+
+### Usage
+
+```javascript
+const variants = Personalization.getVariants();
+```
+
+### Example Return Value
+
+```javascript
+{
+  "0": "a",
+  "1": null
+}
+```
+
+This returns a key-value pair of experience short uid to active variant short uid. 
+
+A variant will be `null` when the experience is disabled or when the user does not satisfy the criteria for any variant.
+
+## Setting the User Attributes
+
+You can now set user attributes in the following manner:
+
+```javascript
+Personalization.set({
+  is_premium_customer: true,
+  age: 30,
+});
+```
+
+You can call the `.set` method any number of times in your app. All the attributes that are set will be available and you can also override the previously set attributes. These attributes are used to evaluate audience membership.
+
+## Adding State to the Response
+
+When the SDK is initialized in backend, it is required for you to enhance the response object using our helper method `addStateToResponse`.
+
+This adds a few cookies that will help personalization run as expected.
+
+### Parameters
+
+1. `response`: (Type: `Response`) - The response object you're returning from the backend.
+
+### Usage
+
+```javascript
+const enhancedResponse = Personalization.addStateToResponse(response);
+```
+
+## Tracking Impressions and Events
+
+### **Trigger Impressions**
+
+For a given user and an experience, you can trigger impressions using `triggerImpressions`.
+
+### Parameters
+
+1. `experienceShortUid`: (Type: `string`) - Short UID of the experience for which you want to register an impression.
+
+### Usage
+
+```javascript
+const experienceShortUid = 'your-experience-shortUid';
+
+await Personalization.triggerImpression(experienceShortUid);
+```
+
+### **Trigger Events**
+
+Suppose you defined a custom event in the management console called `clicked_on_cta` that signifies that a user has clicked on the CTA, you can trigger this event for a given user using `triggerEvent`
+
+### Parameters
+
+1. `eventKey`: (Type: `string`) - Custom event key defined in the personalization management console.
+
+### Usage
+
+```javascript
+const eventKey = 'your-custom-event-key';
+
+await Personalization.triggerEvent(eventKey);
+```
+
+## Resetting SDK
+
+You can reset the SDK using `reset`.
+
+### Usage
+
+```javascript
+Personalization.reset();
+```
+
+This is helpful when you want to clear the SDK properties and start over again. To use any available methods you need to initialize the SDK again.
