@@ -65,7 +65,7 @@ export default {
       const data = blogQuery.where('url', `${entryUrl}`).find();
       data.then(
         (result) => {
-          resolve(result[0]);
+          resolve(result);
         },
         (error) => {
           reject(error);

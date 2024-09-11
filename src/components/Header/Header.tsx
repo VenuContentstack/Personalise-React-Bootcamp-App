@@ -20,10 +20,10 @@ const Header = ({ menu }: HeaderProps) => {
     <header className='header'>
       <div className='container'>
         <div className='logo'>
-          <img
+        <Link to='/'> <img
             src='https://images.contentstack.io/v3/assets/blt7359e2a55efae483/blt518e5105a0686696/663e30a08f19535905e50af2/Logo.svg'
             alt='Logo'
-          />
+          /></Link>
         </div>
         <nav className='nav'>
           <ul>
